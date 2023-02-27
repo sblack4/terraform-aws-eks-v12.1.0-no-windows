@@ -13,14 +13,14 @@ locals {
   cluster_iam_role_arn      = var.manage_cluster_iam_resources ? join("", aws_iam_role.cluster.*.arn) : join("", data.aws_iam_role.custom_cluster_iam_role.*.arn)
   worker_security_group_id  = var.worker_security_group_id == "" ? join("", aws_security_group.workers.*.id) : var.worker_security_group_id
 
-  default_iam_role_id = concat(aws_iam_role.workers.*.id, [""])[0]
-  kubeconfig_name     = var.kubeconfig_name == "" ? "eks_${var.cluster_name}" : var.kubeconfig_name
+  default_iam_role_id    = concat(aws_iam_role.workers.*.id, [""])[0]
+  default_ami_id_linux   = coalesce(local.workers_group_defaults.ami_id, data.aws_ami.eks_worker.id)
+
+  kubeconfig_name = var.kubeconfig_name == "" ? "eks_${var.cluster_name}" : var.kubeconfig_name
 
   worker_group_count                 = length(var.worker_groups)
   worker_group_launch_template_count = length(var.worker_groups_launch_template)
 
-  default_ami_id_linux   = data.aws_ami.eks_worker.id
-  default_ami_id_windows = data.aws_ami.eks_worker_windows.id
 
   workers_group_defaults_defaults = {
     name                          = "count.index"               # Name of the worker group. Literal count.index will never be used but if name is not set, the count.index interpolation will be used.
